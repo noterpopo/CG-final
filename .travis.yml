@@ -26,3 +26,12 @@ install:
 - echo y | sdkmanager "lldb;3.1"
 script:
 - "./gradlew assembleRelease"
+deploy:
+  provider: releases
+  api_key:
+    secure: 30b1387a081de25edf37df80ac71cee9b190b39d
+  file: app/build/outputs/apk/app-release.apk
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
