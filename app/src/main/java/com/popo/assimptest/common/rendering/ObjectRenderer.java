@@ -390,7 +390,7 @@ public class ObjectRenderer {
             }
         }
 
-        ShaderUtil.checkGLError(TAG, "after ani");
+        ShaderUtil.checkGLError(TAG, "after ani data");
 
         // Build the ModelView and ModelViewProjection matrices
         // for calculating object position and light.
