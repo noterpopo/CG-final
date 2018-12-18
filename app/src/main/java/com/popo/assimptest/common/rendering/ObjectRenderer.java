@@ -374,6 +374,12 @@ public class ObjectRenderer {
 
         ShaderUtil.checkGLError(TAG, "Before draw");
 
+        // Build the ModelView and ModelViewProjection matrices
+        // for calculating object position and light.
+        Matrix.multiplyMM(modelViewMatrix, 0, cameraView, 0, modelMatrix, 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, cameraPerspective, 0, modelViewMatrix, 0);
+
+        GLES20.glUseProgram(program);
 
         //aniData
         //TODO
@@ -386,18 +392,17 @@ public class ObjectRenderer {
             importer.getBoneTransform((System.currentTimeMillis()-start)/1000.0f,aniMartData);
             for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
             {
-                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, aniMartData.getAniMatrixArray().get(i), 0);
+                float[] temp=aniMartData.getAniMatrixArray().get(i);
+                float[] data=new float[16];
+                for(int k=0;k<16;++k){
+                    data[k]=temp[k];
+                }
+                int loc=boneLocation[i];
+                GLES20.glUniformMatrix4fv(loc, 1, false, data, 0);
             }
         }
 
         ShaderUtil.checkGLError(TAG, "after ani data");
-
-        // Build the ModelView and ModelViewProjection matrices
-        // for calculating object position and light.
-        Matrix.multiplyMM(modelViewMatrix, 0, cameraView, 0, modelMatrix, 0);
-        Matrix.multiplyMM(modelViewProjectionMatrix, 0, cameraPerspective, 0, modelViewMatrix, 0);
-
-        GLES20.glUseProgram(program);
 
         // Set the lighting environment properties.
         Matrix.multiplyMV(viewLightDirection, 0, modelViewMatrix, 0, LIGHT_DIRECTION, 0);

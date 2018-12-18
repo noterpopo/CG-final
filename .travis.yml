@@ -30,7 +30,7 @@ script:
 deploy:
   provider: releases
   api_key:
-    secure: e83939b2e0e4a14dc36728ccf55a65eb992efb56
+    secure: ${GH_TOKEN}
   file: app/build/outputs/apk/app-release.apk
   skip_cleanup: true
   on:
