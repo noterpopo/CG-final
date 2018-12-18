@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 uniform mat4 u_ModelView;
 uniform mat4 u_ModelViewProjection;
 
