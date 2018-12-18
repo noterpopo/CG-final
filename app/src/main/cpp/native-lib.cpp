@@ -176,7 +176,9 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
     textureCoordArray=new float[textureCoordArraySize];
     indexArray=new jshort[indexArraySize];
     boneIds=new jfloat[boneIdsAndWeightsSize];
+    memset(boneIds,0,boneIdsAndWeightsSize);
     weights=new jfloat[boneIdsAndWeightsSize];
+    memset(weights,0,boneIdsAndWeightsSize);
 
     // init all values in array = 0
     memset(boneIds, 0, sizeof(boneIds));
@@ -231,11 +233,18 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
                 bone_index = m_bone_mapping[bone_name];
             }
 
-            for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+            for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; ++j) {
                 unsigned int vertex_id = mesh->mBones[i]->mWeights[j].mVertexId;
                 float weight = mesh->mBones[i]->mWeights[j].mWeight;
-                boneIds[vertex_id*NUM_BONES_PER_VEREX+j]=bone_index;
-                weights[vertex_id*NUM_BONES_PER_VEREX+j]=weight;
+                for(int g=0;g<NUM_BONES_PER_VEREX;++g)
+                {
+                    if(weights[vertex_id*NUM_BONES_PER_VEREX+g]==0.0)
+                    {
+                        boneIds[vertex_id*NUM_BONES_PER_VEREX+g]=bone_index;
+                        weights[vertex_id*NUM_BONES_PER_VEREX+g]=weight;
+                        break;
+                    }
+                }
             }
         }
     }

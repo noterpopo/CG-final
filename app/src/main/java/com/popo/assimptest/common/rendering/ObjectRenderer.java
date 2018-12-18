@@ -397,8 +397,7 @@ public class ObjectRenderer {
                 for(int k=0;k<16;++k){
                     data[k]=temp[k];
                 }
-                int loc=boneLocation[i];
-                GLES20.glUniformMatrix4fv(loc, 1, false, data, 0);
+                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, data, 0);
             }
         }
 
