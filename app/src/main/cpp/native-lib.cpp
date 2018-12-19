@@ -39,7 +39,7 @@ map<string, unsigned int> m_bone_mapping; // maps a bone name and their index
 
 unsigned int m_num_bones=0;
 
-vector<BoneMatrix> m_bone_matrices;
+static vector<BoneMatrix> m_bone_matrices;
 
 float ticks_per_second = 0.0f;
 
@@ -140,7 +140,7 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
 
     char *buf=reinterpret_cast<char*>(buffer.data());
 
-    importer.ReadFileFromMemory(buf,count,aiProcessPreset_TargetRealtime_Fast);
+    importer.ReadFileFromMemory(buf,count,aiProcess_Triangulate | aiProcess_FlipUVs);
     scene=importer.GetOrphanedScene();
    // const aiScene* scene=importer.ReadFile("/sdcard/temp.txt", aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if(!scene){return JNI_FALSE;}
@@ -175,13 +175,15 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
     textureCoordArray=new float[textureCoordArraySize];
     indexArray=new jshort[indexArraySize];
     boneIds=new jfloat[boneIdsAndWeightsSize];
-    memset(boneIds,0,boneIdsAndWeightsSize);
     weights=new jfloat[boneIdsAndWeightsSize];
-    memset(weights,0,boneIdsAndWeightsSize);
 
     // init all values in array = 0
-    memset(boneIds, 0, sizeof(boneIds));
-    memset(weights, 0, sizeof(weights));
+    memset(vertexArray, 0, sizeof(jfloat)*vertexArraySize);
+    memset(normalArray, 0, sizeof(jfloat)*normalArraySize);
+    memset(textureCoordArray, 0, sizeof(jfloat)*textureCoordArraySize);
+    memset(indexArray, 0, sizeof(jshort)*indexArraySize);
+    memset(boneIds, 0, sizeof(jfloat)*boneIdsAndWeightsSize);
+    memset(weights, 0, sizeof(jfloat)*boneIdsAndWeightsSize);
 
 
 
@@ -402,7 +404,6 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
 
 void readNodeHierarchy(aiScene* gscene,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform)
 {
-    p_node->mName.data;
     string node_name(p_node->mName.data);
 
     const aiAnimation* animation = gscene->mAnimations[0];

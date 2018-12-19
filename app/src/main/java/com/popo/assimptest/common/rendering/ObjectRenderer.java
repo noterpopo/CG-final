@@ -390,7 +390,7 @@ public class ObjectRenderer {
             AniMartData aniMartData=importer.getAniData((System.currentTimeMillis()-start)/1000.0f);
             for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
             {
-                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, aniMartData.getAniMatrixArray().get(i), 0);
+                GLES20.glUniformMatrix4fv(boneLocation[i], 1, true, aniMartData.getAniMatrixArray().get(i), 0);
             }
         }
         ShaderUtil.checkGLError(TAG, "after ani");
