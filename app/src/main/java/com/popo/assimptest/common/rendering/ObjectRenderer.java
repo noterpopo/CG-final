@@ -343,12 +343,11 @@ public class ObjectRenderer {
 
     public void testAni(){
         if(hasAni){
-            AniMartData aniMartData=new AniMartData();
             if(isFirst){
                 start=System.currentTimeMillis();
                 isFirst=false;
             }
-            importer.getBoneTransform((System.currentTimeMillis()-start)/1000.0f,aniMartData);
+            AniMartData aniMartData=importer.getAniData((System.currentTimeMillis()-start)/1000.0f);
             for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
             {
                 GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, aniMartData.getAniMatrixArray().get(i), 0);
@@ -384,24 +383,17 @@ public class ObjectRenderer {
         //aniData
         //TODO
         if(hasAni){
-            AniMartData aniMartData=new AniMartData();
             if(isFirst){
                 start=System.currentTimeMillis();
                 isFirst=false;
             }
-            importer.getBoneTransform((System.currentTimeMillis()-start)/1000.0f,aniMartData);
+            AniMartData aniMartData=importer.getAniData((System.currentTimeMillis()-start)/1000.0f);
             for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
             {
-                float[] temp=aniMartData.getAniMatrixArray().get(i);
-                float[] data=new float[16];
-                for(int k=0;k<16;++k){
-                    data[k]=temp[k];
-                }
-                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, data, 0);
+                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, aniMartData.getAniMatrixArray().get(i), 0);
             }
         }
-
-        ShaderUtil.checkGLError(TAG, "after ani data");
+        ShaderUtil.checkGLError(TAG, "after ani");
 
         // Set the lighting environment properties.
         Matrix.multiplyMV(viewLightDirection, 0, modelViewMatrix, 0, LIGHT_DIRECTION, 0);

@@ -7,6 +7,7 @@ import android.util.Log;
 
 public class AssimpImporter {
     private Context context;
+    private long ptr=-1;
 
     public AssimpImporter(Context context) {
         this.context = context;
@@ -15,7 +16,7 @@ public class AssimpImporter {
     public ModelData getModelData(String name) {
         ModelData modelData = new ModelData();
         try {
-            modelimporter(modelData, context.getAssets(), name);
+            ptr=modelimporter(modelData, context.getAssets(), name);
 
         } catch (Exception e) {
             Log.e("JniExceptionHandler", e.toString());
@@ -24,12 +25,24 @@ public class AssimpImporter {
             return modelData;
         }
     }
+    public AniMartData getAniData(double tis){
+        AniMartData aniMartData = new AniMartData();
+        try {
+            getBoneTransform(ptr,tis,aniMartData);
+
+        } catch (Exception e) {
+            Log.e("JniExceptionHandler", e.toString());
+        }
+        finally {
+            return aniMartData;
+        }
+    }
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
-    public native boolean modelimporter(ModelData modelData, AssetManager manager, String filename);
-    public native void getBoneTransform(double tis,AniMartData aniMartData);
+    public native long modelimporter(ModelData modelData, AssetManager manager, String filename);
+    public native void getBoneTransform(long ptr,double tis,AniMartData aniMartData);
 
     // Used to load the 'native-lib' library on application startup.
     static {

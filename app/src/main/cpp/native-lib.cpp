@@ -34,7 +34,6 @@ struct BoneMatrix
 
 
 static const aiScene *scene;
-static aiScene gscene;
 
 map<string, unsigned int> m_bone_mapping; // maps a bone name and their index
 
@@ -51,7 +50,7 @@ aiMatrix4x4 m_global_inverse_transform;
 void processMesh(aiMesh* mesh, const aiScene* scene);
 void processNode(aiNode* node, const aiScene* scene);
 
-void readNodeHierarchy(float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform);
+void readNodeHierarchy(aiScene* gscene,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform);
 const aiNodeAnim * findNodeAnim(const aiAnimation * p_animation, const string p_node_name);
 unsigned int findPosition(float p_animation_time, const aiNodeAnim* p_node_anim);
 unsigned int findRotation(float p_animation_time, const aiNodeAnim* p_node_anim);
@@ -84,7 +83,7 @@ void JNU_ThrowByName(JNIEnv *env, const char *name, const char *msg)
     env->DeleteLocalRef(cls);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL
+extern "C" JNIEXPORT jlong JNICALL
 Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jobject model,jobject assetManager,jstring filename)
 {
     jfloat* vertexArray;
@@ -141,7 +140,8 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
 
     char *buf=reinterpret_cast<char*>(buffer.data());
 
-    scene=importer.ReadFileFromMemory(buf,count,aiProcessPreset_TargetRealtime_Fast);
+    importer.ReadFileFromMemory(buf,count,aiProcessPreset_TargetRealtime_Fast);
+    scene=importer.GetOrphanedScene();
    // const aiScene* scene=importer.ReadFile("/sdcard/temp.txt", aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if(!scene){return JNI_FALSE;}
 
@@ -158,7 +158,6 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
     {
         ticks_per_second = 25.0f;
     }
-    gscene=*scene;
 
     processNode(scene->mRootNode, scene);
 
@@ -310,7 +309,7 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
         return -1;
     }
     LOGD("ok6");
-    return true;
+    return (long)scene;
 }
 
 void processMesh(aiMesh* mesh, const aiScene* scene) {
@@ -327,15 +326,16 @@ void processNode(aiNode* node, const aiScene* scene)
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj,jdouble time_in_sec,jobject data)
+Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj,jlong ptr,jdouble time_in_sec,jobject data)
 {
+    aiScene * gscene=(aiScene*)ptr;
     vector<aiMatrix4x4> transforms;
 
     aiMatrix4x4 identity_matrix; // = mat4(1.0f);
 
     double time_in_ticks = time_in_sec * ticks_per_second;
-    float animation_time = (float)fmod(time_in_ticks, gscene.mAnimations[0]->mDuration);
-    readNodeHierarchy(animation_time, gscene.mRootNode, identity_matrix);
+    float animation_time = (float)fmod(time_in_ticks, gscene->mAnimations[0]->mDuration);
+    readNodeHierarchy(gscene,animation_time, gscene->mRootNode, identity_matrix);
 
     transforms.resize(m_num_bones);
 
@@ -400,12 +400,12 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
 
 }
 
-void readNodeHierarchy(float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform)
+void readNodeHierarchy(aiScene* gscene,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform)
 {
     p_node->mName.data;
     string node_name(p_node->mName.data);
 
-    const aiAnimation* animation = gscene.mAnimations[0];
+    const aiAnimation* animation = gscene->mAnimations[0];
     aiMatrix4x4 node_transform = p_node->mTransformation;
 
     const aiNodeAnim* node_anim = findNodeAnim(animation, node_name);
@@ -446,7 +446,7 @@ void readNodeHierarchy(float p_animation_time, const aiNode* p_node, const aiMat
 
     for (unsigned int i = 0; i < p_node->mNumChildren; i++)
     {
-        readNodeHierarchy(p_animation_time, p_node->mChildren[i], global_transform);
+        readNodeHierarchy(gscene,p_animation_time, p_node->mChildren[i], global_transform);
     }
 }
 unsigned int findPosition(float p_animation_time, const aiNodeAnim* p_node_anim)
