@@ -28,7 +28,9 @@ public class AssimpImporter {
     public AniMartData getAniData(double tis){
         AniMartData aniMartData = new AniMartData();
         try {
-            getBoneTransform(ptr,tis,aniMartData);
+            if(getBoneTransform(ptr,tis,aniMartData)){
+                return aniMartData;
+            }
 
         } catch (Exception e) {
             Log.e("JniExceptionHandler", e.toString());
@@ -42,7 +44,7 @@ public class AssimpImporter {
      * which is packaged with this application.
      */
     public native long modelimporter(ModelData modelData, AssetManager manager, String filename);
-    public native void getBoneTransform(long ptr,double tis,AniMartData aniMartData);
+    public native boolean getBoneTransform(long ptr,double tis,AniMartData aniMartData);
 
     // Used to load the 'native-lib' library on application startup.
     static {

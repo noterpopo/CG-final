@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             planeRenderer.createOnGlThread(/*context=*/ this, "models/trigrid.png");
             pointCloudRenderer.createOnGlThread(/*context=*/ this);
 
-            virtualObject.createOnGlThread(/*context=*/ this, "models/man/model.dae", "models/man/diffuse.png");
+            virtualObject.createOnGlThread(/*context=*/ this, "models/SBB/Robot_M.dae", "models/SBB/Sphere_Bot_color_2.jpg");
             virtualObject.setMaterialProperties(0.0f, 2.0f, 0.5f, 6.0f);
 
 
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
 
             // Visualize anchors created by touch.
-            float scaleFactor = 0.4f;
+            float scaleFactor = 0.2f;
             for (ColoredAnchor coloredAnchor : anchors) {
                 if (coloredAnchor.anchor.getTrackingState() != TrackingState.TRACKING) {
                     continue;

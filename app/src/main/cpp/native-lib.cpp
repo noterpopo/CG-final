@@ -327,7 +327,7 @@ void processNode(aiNode* node, const aiScene* scene)
 
 }
 
-extern "C" JNIEXPORT void JNICALL
+extern "C" JNIEXPORT jboolean JNICALL
 Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj,jlong ptr,jdouble time_in_sec,jobject data)
 {
     aiScene * gscene=(aiScene*)ptr;
@@ -336,6 +336,11 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
     aiMatrix4x4 identity_matrix; // = mat4(1.0f);
 
     double time_in_ticks = time_in_sec * ticks_per_second;
+//    //非循环播放
+//    if(time_in_ticks>gscene->mAnimations[0]->mDuration){
+//        return false;
+//    }
+    //循环播放
     float animation_time = (float)fmod(time_in_ticks, gscene->mAnimations[0]->mDuration);
     readNodeHierarchy(gscene,animation_time, gscene->mRootNode, identity_matrix);
 
@@ -347,7 +352,7 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
     }
 
     jclass cls=env->GetObjectClass(data);
-    if(!cls){return ;}
+    if(!cls){return false;}
     if (checkExc(env)==1) {
         LOGD("jni exception happened at p0");
         JNU_ThrowByName(env, "java/lang/Exception", "exception from jni: jni exception happened at p0");
@@ -398,7 +403,7 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
         JNU_ThrowByName(env, "java/lang/Exception", "exception from jni: jni exception happened at p100");
     }
     LOGD("ok100");
-
+    return true;
 
 }
 
