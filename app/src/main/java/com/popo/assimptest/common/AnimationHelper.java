@@ -1,7 +1,7 @@
 package com.popo.assimptest.common;
 
 public class AnimationHelper {
-    Animation getAnimation(AnimationType type){
+    public static Animation getAnimation(AnimationType type){
         switch (type){
             case OPEN:
                 return new OpenAnimation();

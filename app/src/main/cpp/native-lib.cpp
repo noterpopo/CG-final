@@ -50,7 +50,7 @@ aiMatrix4x4 m_global_inverse_transform;
 void processMesh(aiMesh* mesh, const aiScene* scene);
 void processNode(aiNode* node, const aiScene* scene);
 
-void readNodeHierarchy(aiScene* gscene,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform);
+void readNodeHierarchy(aiScene* gscene,int aniIndex,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform);
 const aiNodeAnim * findNodeAnim(const aiAnimation * p_animation, const string p_node_name);
 unsigned int findPosition(float p_animation_time, const aiNodeAnim* p_node_anim);
 unsigned int findRotation(float p_animation_time, const aiNodeAnim* p_node_anim);
@@ -150,9 +150,9 @@ Java_com_popo_assimptest_AssimpImporter_modelimporter(JNIEnv* env,jobject obj,jo
     m_global_inverse_transform = scene->mRootNode->mTransformation;
     m_global_inverse_transform.Inverse();
 
-    if (scene->mNumAnimations != 0&&scene->mAnimations[2]->mTicksPerSecond != 0.0)
+    if (scene->mNumAnimations != 0&&scene->mAnimations[0]->mTicksPerSecond != 0.0)
     {
-        ticks_per_second = (float)scene->mAnimations[2]->mTicksPerSecond;
+        ticks_per_second = (float)scene->mAnimations[0]->mTicksPerSecond;
     }
     else
     {
@@ -328,7 +328,7 @@ void processNode(aiNode* node, const aiScene* scene)
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj,jlong ptr,jdouble time_in_sec,jobject data)
+Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj,jint aniIndex,jboolean isLoop,jlong ptr,jdouble time_in_sec,jobject data)
 {
     aiScene * gscene=(aiScene*)ptr;
     vector<aiMatrix4x4> transforms;
@@ -336,13 +336,16 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
     aiMatrix4x4 identity_matrix; // = mat4(1.0f);
 
     double time_in_ticks = time_in_sec * ticks_per_second;
-//    //非循环播放
-//    if(time_in_ticks>gscene->mAnimations[0]->mDuration){
-//        return false;
-//    }
-    //循环播放
-    float animation_time = (float)fmod(time_in_ticks, gscene->mAnimations[2]->mDuration);
-    readNodeHierarchy(gscene,animation_time, gscene->mRootNode, identity_matrix);
+    float animation_time=-1;
+    if(isLoop)
+    {
+        animation_time = (float)fmod(time_in_ticks, gscene->mAnimations[aniIndex]->mDuration);
+    } else{
+        if(time_in_ticks>gscene->mAnimations[0]->mDuration){
+            return false;
+        }
+    }
+    readNodeHierarchy(gscene,aniIndex,animation_time, gscene->mRootNode, identity_matrix);
 
     transforms.resize(m_num_bones);
 
@@ -407,11 +410,11 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
 
 }
 
-void readNodeHierarchy(aiScene* gscene,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform)
+void readNodeHierarchy(aiScene* gscene,int aniIndex,float p_animation_time, const aiNode* p_node, const aiMatrix4x4 parent_transform)
 {
     string node_name(p_node->mName.data);
 
-    const aiAnimation* animation = gscene->mAnimations[2];
+    const aiAnimation* animation = gscene->mAnimations[aniIndex];
     aiMatrix4x4 node_transform = p_node->mTransformation;
 
     const aiNodeAnim* node_anim = findNodeAnim(animation, node_name);
@@ -452,7 +455,7 @@ void readNodeHierarchy(aiScene* gscene,float p_animation_time, const aiNode* p_n
 
     for (unsigned int i = 0; i < p_node->mNumChildren; i++)
     {
-        readNodeHierarchy(gscene,p_animation_time, p_node->mChildren[i], global_transform);
+        readNodeHierarchy(gscene,aniIndex,p_animation_time, p_node->mChildren[i], global_transform);
     }
 }
 unsigned int findPosition(float p_animation_time, const aiNodeAnim* p_node_anim)

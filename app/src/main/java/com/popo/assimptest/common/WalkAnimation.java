@@ -1,5 +1,5 @@
 package com.popo.assimptest.common;
 
-public class WalkAnimation implements Animation{
+public class WalkAnimation extends Animation{
     float[] moveMat=new float[16];
 }

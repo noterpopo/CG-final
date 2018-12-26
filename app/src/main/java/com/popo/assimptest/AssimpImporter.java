@@ -25,10 +25,10 @@ public class AssimpImporter {
             return modelData;
         }
     }
-    public AniMartData getAniData(double tis){
+    public AniMartData getAniData(int aniIndex,boolean isLoop,double tis){
         AniMartData aniMartData = new AniMartData();
         try {
-            if(getBoneTransform(ptr,tis,aniMartData)){
+            if(getBoneTransform(aniIndex,isLoop,ptr,tis,aniMartData)){
                 return aniMartData;
             }
 
@@ -44,7 +44,7 @@ public class AssimpImporter {
      * which is packaged with this application.
      */
     public native long modelimporter(ModelData modelData, AssetManager manager, String filename);
-    public native boolean getBoneTransform(long ptr,double tis,AniMartData aniMartData);
+    public native boolean getBoneTransform(int aniIndex,boolean isLoop,long ptr,double tis,AniMartData aniMartData);
 
     // Used to load the 'native-lib' library on application startup.
     static {

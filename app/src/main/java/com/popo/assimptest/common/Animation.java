@@ -1,11 +1,7 @@
 package com.popo.assimptest.common;
 
-enum AnimationType{
-    OPEN,
-    WALK,
-    ATTACK
-}
-public interface Animation {
-    boolean isLoop=false;
-    boolean isContinue=false;
+public class Animation {
+    public boolean isLoop=false;
+    public boolean isContinue=false;
+    public boolean isFirst=true;
 }

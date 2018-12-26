@@ -24,6 +24,9 @@ import android.opengl.Matrix;
 import com.popo.assimptest.AniMartData;
 import com.popo.assimptest.AssimpImporter;
 import com.popo.assimptest.ModelData;
+import com.popo.assimptest.common.Animation;
+import com.popo.assimptest.common.AnimationHelper;
+import com.popo.assimptest.common.AnimationType;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -38,7 +41,6 @@ public class ObjectRenderer {
     private static final int MAX_BONES_NUM=100;
 
     private Context context;
-    private boolean isFirst=true;
     private long start=0;
 
     public ObjectRenderer(Context context) {
@@ -68,6 +70,8 @@ public class ObjectRenderer {
     private static final int COORDS_PER_VERTEX = 3;
 
     private AssimpImporter importer;
+
+    private Animation animation;
 
     // Note: the last component must be zero to avoid applying the translational part of the matrix.
     private static final float[] LIGHT_DIRECTION = new float[]{0.250f, 0.866f, 0.433f, 0.0f};
@@ -341,20 +345,30 @@ public class ObjectRenderer {
         this.specularPower = specularPower;
     }
 
-    public void testAni(){
-        if(hasAni){
-            if(isFirst){
-                start=System.currentTimeMillis();
-                isFirst=false;
-            }
-            AniMartData aniMartData=importer.getAniData((System.currentTimeMillis()-start)/1000.0f);
-            for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
-            {
-                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, aniMartData.getAniMatrixArray().get(i), 0);
-            }
-        }
-        ShaderUtil.checkGLError(TAG, "after ani");
+    public void updateAnimation(boolean isLoop,boolean isContinue){
+        animation.isLoop=isLoop;
+        animation.isContinue=isContinue;
     }
+
+    public void createAnimation(AnimationType type)
+    {
+        animation=AnimationHelper.getAnimation(type);
+    }
+
+//    public void testAni(){
+//        if(hasAni){
+//            if(isFirst){
+//                start=System.currentTimeMillis();
+//                isFirst=false;
+//            }
+//            AniMartData aniMartData=importer.getAniData((System.currentTimeMillis()-start)/1000.0f);
+//            for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
+//            {
+//                GLES20.glUniformMatrix4fv(boneLocation[i], 1, false, aniMartData.getAniMatrixArray().get(i), 0);
+//            }
+//        }
+//        ShaderUtil.checkGLError(TAG, "after ani");
+//    }
 
     /**
      * Draws the model.
@@ -382,12 +396,12 @@ public class ObjectRenderer {
 
         //aniData
         //TODO
-        if(hasAni){
-            if(isFirst){
+        if(hasAni&&animation.isContinue){
+            if(animation.isFirst){
                 start=System.currentTimeMillis();
-                isFirst=false;
+                animation.isFirst=false;
             }
-            AniMartData aniMartData=importer.getAniData((System.currentTimeMillis()-start)/1000.0f);
+            AniMartData aniMartData=importer.getAniData(0,animation.isLoop,(System.currentTimeMillis()-start)/1000.0f);
             for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
             {
                 GLES20.glUniformMatrix4fv(boneLocation[i], 1, true, aniMartData.getAniMatrixArray().get(i), 0);
