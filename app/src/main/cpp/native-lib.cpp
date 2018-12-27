@@ -341,8 +341,12 @@ Java_com_popo_assimptest_AssimpImporter_getBoneTransform(JNIEnv* env,jobject obj
     {
         animation_time = (float)fmod(time_in_ticks, gscene->mAnimations[aniIndex]->mDuration);
     } else{
-        if(time_in_ticks>gscene->mAnimations[0]->mDuration){
+        if(time_in_ticks>gscene->mAnimations[aniIndex]->mDuration)
+        {
             return false;
+        } else
+        {
+            animation_time = (float)fmod(time_in_ticks, gscene->mAnimations[aniIndex]->mDuration);
         }
     }
     readNodeHierarchy(gscene,aniIndex,animation_time, gscene->mRootNode, identity_matrix);

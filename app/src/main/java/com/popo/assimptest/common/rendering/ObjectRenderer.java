@@ -71,7 +71,7 @@ public class ObjectRenderer {
 
     private AssimpImporter importer;
 
-    private Animation animation;
+    private Animation animation=new Animation(AnimationType.WALK);
 
     // Note: the last component must be zero to avoid applying the translational part of the matrix.
     private static final float[] LIGHT_DIRECTION = new float[]{0.250f, 0.866f, 0.433f, 0.0f};
@@ -345,9 +345,8 @@ public class ObjectRenderer {
         this.specularPower = specularPower;
     }
 
-    public void updateAnimation(boolean isLoop,boolean isContinue){
+    public void updateAnimation(boolean isLoop){
         animation.isLoop=isLoop;
-        animation.isContinue=isContinue;
     }
 
     public void createAnimation(AnimationType type)
@@ -397,14 +396,39 @@ public class ObjectRenderer {
         //aniData
         //TODO
         if(hasAni&&animation.isContinue){
+            int aniIndex=-1;
+            switch (animation.type){
+                case OPEN:
+                    aniIndex=0;
+                    break;
+                case BEFORE_WALK:
+                    aniIndex=3;
+                    break;
+                case WALK:
+                    aniIndex=1;
+                    break;
+                case AFTER_WALK:
+                    aniIndex=2;
+                    break;
+                case ATTACK:
+                    aniIndex=4;
+                    break;
+            }
             if(animation.isFirst){
                 start=System.currentTimeMillis();
                 animation.isFirst=false;
             }
-            AniMartData aniMartData=importer.getAniData(0,animation.isLoop,(System.currentTimeMillis()-start)/1000.0f);
-            for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
-            {
-                GLES20.glUniformMatrix4fv(boneLocation[i], 1, true, aniMartData.getAniMatrixArray().get(i), 0);
+            AniMartData aniMartData=importer.getAniData(aniIndex,animation.isLoop,(System.currentTimeMillis()-start)/1000.0f);
+            if(aniMartData==null){
+                animation.isContinue=false;
+            }else {
+                if(animation.type==AnimationType.WALK){
+                    Matrix.translateM(modelMatrix,0,0,-1,0);
+                }
+                for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
+                {
+                    GLES20.glUniformMatrix4fv(boneLocation[i], 1, true, aniMartData.getAniMatrixArray().get(i), 0);
+                }
             }
         }
         ShaderUtil.checkGLError(TAG, "after ani");

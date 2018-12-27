@@ -30,6 +30,8 @@ public class AssimpImporter {
         try {
             if(getBoneTransform(aniIndex,isLoop,ptr,tis,aniMartData)){
                 return aniMartData;
+            }else {
+                return null;
             }
 
         } catch (Exception e) {
