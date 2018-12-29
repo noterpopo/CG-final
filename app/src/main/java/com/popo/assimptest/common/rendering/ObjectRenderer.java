@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.popo.assimptest.AniMartData;
 import com.popo.assimptest.AssimpImporter;
@@ -43,6 +44,8 @@ public class ObjectRenderer {
     private Context context;
     private long start=0;
 
+    private float orad=0;
+
     public ObjectRenderer(Context context) {
         this.context = context;
     }
@@ -50,7 +53,6 @@ public class ObjectRenderer {
     /**
      * Blend mode.
      *
-     * @see #setBlendMode(BlendMode)
      */
     public enum BlendMode {
         /**
@@ -71,7 +73,7 @@ public class ObjectRenderer {
 
     private AssimpImporter importer;
 
-    private Animation animation=new Animation(AnimationType.WALK);
+    private Animation animation=new Animation(AnimationType.OPEN);
 
     // Note: the last component must be zero to avoid applying the translational part of the matrix.
     private static final float[] LIGHT_DIRECTION = new float[]{0.250f, 0.866f, 0.433f, 0.0f};
@@ -119,7 +121,7 @@ public class ObjectRenderer {
 
     // Shader location: object color property (to change the primary color of the object).
 
-    private BlendMode blendMode = null;
+    private BlendMode blendMode = BlendMode.Grid;
 
     // Temporary matrices allocated here to reduce number of allocations for each frame.
     private final float[] modelMatrix = new float[16];
@@ -304,15 +306,6 @@ public class ObjectRenderer {
     }
 
     /**
-     * Selects the blending mode for rendering.
-     *
-     * @param blendMode The blending mode. Null indicates no blending (opaque rendering).
-     */
-    public void setBlendMode(BlendMode blendMode) {
-        this.blendMode = blendMode;
-    }
-
-    /**
      * Updates the object model matrix and applies scaling.
      *
      * @param modelMatrix A 4x4 model-to-world transformation matrix, stored in column-major order.
@@ -326,6 +319,13 @@ public class ObjectRenderer {
         scaleMatrix[5] = scaleFactor;
         scaleMatrix[10] = scaleFactor;
         Matrix.multiplyMM(this.modelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
+    }
+
+    public void move(float r){
+        Log.d("move","moveTrans");
+        Matrix.translateM(modelMatrix,0,0,0,(float) 0.05);
+        Matrix.rotateM(modelMatrix,0,(int) ((r-orad)/3.14159*180),0,(float) 1.0,0);
+        orad=r;
     }
 
     /**
@@ -347,6 +347,10 @@ public class ObjectRenderer {
 
     public void updateAnimation(boolean isLoop){
         animation.isLoop=isLoop;
+    }
+
+    public Animation getAnimation(){
+        return animation;
     }
 
     public void createAnimation(AnimationType type)
@@ -374,7 +378,6 @@ public class ObjectRenderer {
      *
      * @param cameraView        A 4x4 view matrix, in column-major order.
      * @param cameraPerspective A 4x4 projection matrix, in column-major order.
-     * @see #setBlendMode(BlendMode)
      * @see #updateModelMatrix(float[], float)
      * @see #setMaterialProperties(float, float, float, float)
      * @see Matrix
@@ -421,10 +424,11 @@ public class ObjectRenderer {
             AniMartData aniMartData=importer.getAniData(aniIndex,animation.isLoop,(System.currentTimeMillis()-start)/1000.0f);
             if(aniMartData==null){
                 animation.isContinue=false;
-            }else {
-                if(animation.type==AnimationType.WALK){
-                    Matrix.translateM(modelMatrix,0,0,-1,0);
+                if(animation.type==AnimationType.BEFORE_WALK){
+                    animation=new Animation(AnimationType.WALK);
+                    Log.d("move","goOnWalk");
                 }
+            }else {
                 for (int i = 0; i < aniMartData.getAniMatrixArray().size(); i++) // move all matrices for actual model position to shader
                 {
                     GLES20.glUniformMatrix4fv(boneLocation[i], 1, true, aniMartData.getAniMatrixArray().get(i), 0);

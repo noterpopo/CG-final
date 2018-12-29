@@ -36,9 +36,7 @@ public class AssimpImporter {
 
         } catch (Exception e) {
             Log.e("JniExceptionHandler", e.toString());
-        }
-        finally {
-            return aniMartData;
+            return null;
         }
     }
     /**

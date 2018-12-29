@@ -30,6 +30,7 @@ import java.util.concurrent.BlockingQueue;
 public final class TapHelper implements OnTouchListener {
   private final GestureDetector gestureDetector;
   private final BlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
+    private final BlockingQueue<MotionEvent> queuedLongPress = new ArrayBlockingQueue<>(16);
 
   /**
    * Creates the tap helper.
@@ -48,7 +49,13 @@ public final class TapHelper implements OnTouchListener {
                 return true;
               }
 
-              @Override
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    queuedLongPress.offer(e);
+                    return;
+                }
+
+                @Override
               public boolean onDown(MotionEvent e) {
                 return true;
               }
@@ -60,8 +67,11 @@ public final class TapHelper implements OnTouchListener {
    *
    * @return if a tap was queued, a MotionEvent for the tap. Otherwise null if no taps are queued.
    */
-  public MotionEvent poll() {
+  public MotionEvent pollTap() {
     return queuedSingleTaps.poll();
+  }
+  public MotionEvent pollLongPress(){
+      return queuedLongPress.poll();
   }
 
   @Override

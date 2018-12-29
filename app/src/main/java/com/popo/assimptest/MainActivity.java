@@ -3,10 +3,13 @@ package com.popo.assimptest;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
@@ -26,6 +29,9 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+import com.popo.assimptest.common.AnimationType;
+import com.popo.assimptest.common.MoveListener;
+import com.popo.assimptest.common.MovePanel;
 import com.popo.assimptest.common.helpers.PermissionHelper;
 import com.popo.assimptest.common.helpers.DisplayRotationHelper;
 import com.popo.assimptest.common.helpers.FullScreenHelper;
@@ -44,6 +50,12 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer{
     private static final String TAG=MainActivity.class.getSimpleName();
+
+    //移动Panel
+    private MovePanel movePanel;
+
+    boolean isNewArch=true;
+
 
     private GLSurfaceView surfaceView;
 
@@ -77,6 +89,33 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //TODO 初始化move_panel
+        movePanel=findViewById(R.id.movepanel);
+        movePanel.setMoveListener(new MoveListener() {
+            @Override
+            public void onMove(float rad) {
+                Log.d("move","onMove");
+                Log.d("rad",rad+"");
+                if(virtualObject.getAnimation().type==AnimationType.WALK){
+                    virtualObject.move(rad);
+                    Log.d("move","onWALK");
+                }else if(virtualObject.getAnimation().type==AnimationType.BEFORE_WALK){
+
+                }else {
+                    virtualObject.createAnimation(AnimationType.BEFORE_WALK);
+                    Log.d("move","onBWALK");
+                }
+            }
+
+            @Override
+            public void onUp() {
+                if(virtualObject.getAnimation().type==AnimationType.WALK){
+                    virtualObject.createAnimation(AnimationType.AFTER_WALK);
+                    Log.d("up","onAWALK");
+                }
+            }
+        });
 
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
@@ -298,7 +337,10 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 coloredAnchor.anchor.getPose().toMatrix(anchorMatrix, 0);
 
                 // Update and draw the model and its shadow.
-                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
+                if(isNewArch){
+                    virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
+                    isNewArch=false;
+                }
                 virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba);
             }
 
@@ -310,7 +352,8 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     // Handle only one tap per frame, as taps are usually low frequency compared to frame rate.
     private void handleTap(Frame frame, Camera camera) {
-        MotionEvent tap = tapHelper.poll();
+        MotionEvent tap = tapHelper.pollTap();
+        MotionEvent longPress=tapHelper.pollLongPress();
         if (tap != null && camera.getTrackingState() == TrackingState.TRACKING) {
             for (HitResult hit : frame.hitTest(tap)) {
                 // Check if any plane was hit, and if it was hit inside the plane polygon
@@ -329,6 +372,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                         anchors.get(0).anchor.detach();
                         anchors.remove(0);
                     }
+                    isNewArch=true;
 
 
 
@@ -339,6 +383,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     break;
                 }
             }
+        }
+        if(longPress!=null){
+
         }
     }
 

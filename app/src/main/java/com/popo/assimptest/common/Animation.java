@@ -1,7 +1,7 @@
 package com.popo.assimptest.common;
 
 public class Animation {
-    public boolean isLoop=true;
+    public boolean isLoop=false;
     public boolean isContinue=true;
     public boolean isFirst=true;
     public AnimationType type;
@@ -12,5 +12,8 @@ public class Animation {
 
     public Animation(AnimationType type) {
         this.type = type;
+        if(type==AnimationType.WALK){
+            isLoop=true;
+        }
     }
 }
