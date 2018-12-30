@@ -22,11 +22,11 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.popo.assimptest.AniMartData;
+import com.popo.assimptest.common.AniMartData;
 import com.popo.assimptest.AssimpImporter;
 import com.popo.assimptest.ModelData;
 import com.popo.assimptest.common.Animation;
-import com.popo.assimptest.common.AnimationHelper;
+import com.popo.assimptest.common.helpers.AnimationHelper;
 import com.popo.assimptest.common.AnimationType;
 
 import java.io.IOException;
@@ -205,6 +205,8 @@ public class ObjectRenderer {
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
         GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
         textureBitmap.recycle();
 

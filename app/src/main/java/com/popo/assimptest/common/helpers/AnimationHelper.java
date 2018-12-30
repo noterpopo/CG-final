@@ -1,4 +1,7 @@
-package com.popo.assimptest.common;
+package com.popo.assimptest.common.helpers;
+
+import com.popo.assimptest.common.Animation;
+import com.popo.assimptest.common.AnimationType;
 
 public class AnimationHelper {
     public static Animation getAnimation(AnimationType type){

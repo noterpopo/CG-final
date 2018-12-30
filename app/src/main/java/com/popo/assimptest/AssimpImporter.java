@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
+import com.popo.assimptest.common.AniMartData;
+
 
 public class AssimpImporter {
     private Context context;
@@ -25,7 +27,7 @@ public class AssimpImporter {
             return modelData;
         }
     }
-    public AniMartData getAniData(int aniIndex,boolean isLoop,double tis){
+    public AniMartData getAniData(int aniIndex, boolean isLoop, double tis){
         AniMartData aniMartData = new AniMartData();
         try {
             if(getBoneTransform(aniIndex,isLoop,ptr,tis,aniMartData)){

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
@@ -54,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     //移动Panel
     private MovePanel movePanel;
 
+    //攻击btn
+    private ImageButton attackBtn;
+
     boolean isNewArch=true;
 
 
@@ -89,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        attackBtn=findViewById(R.id.attackbtn);
+        attackBtn.setOnClickListener(v -> virtualObject.createAnimation(AnimationType.ATTACK));
 
         //TODO 初始化move_panel
         movePanel=findViewById(R.id.movepanel);

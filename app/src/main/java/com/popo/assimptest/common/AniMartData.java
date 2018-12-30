@@ -1,4 +1,4 @@
-package com.popo.assimptest;
+package com.popo.assimptest.common;
 
 import java.util.Vector;
 
