@@ -3,8 +3,6 @@ package com.popo.assimptest;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
